@@ -1,0 +1,46 @@
+version: "3.2"
+services:
+
+# Postgres
+  postgres:
+    build: postgres
+    ports:
+      - "5432:5432"
+    container_name: postgres  
+    networks:
+      - net
+    environment:
+      - POSTGRES_USER=liquibaseUser
+      - POSTGRES_PASSWORD=liquibasePassword
+      - POSTGRES_DB=liquibaseTest
+    volumes:
+      - type: volume
+        source: postgresql
+        target: /var/lib/postgresql
+
+      - type: volume
+        source: postresql_data
+        target: /var/lib/postgresql/data
+        
+   
+# Tomcat
+  tomcat:
+    build: tomcat
+    depends_on:
+        - postgres
+    environment:
+      - -Dscheduler.enabled=true -Dscheduler.interval=180000
+    ports:
+      - "8080:8080"
+    container_name: tomcat
+    
+    networks:
+      - net
+      
+ 
+networks:
+  net:
+    driver: bridge
+volumes:
+  postgresql:
+  postresql_data:
